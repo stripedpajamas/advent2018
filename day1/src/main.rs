@@ -19,7 +19,7 @@ fn find_repeated_freq(input: &Vec<i32>) -> i32 {
     let mut freqs: HashSet<i32> = HashSet::new();
     let mut total: i32 = 0;
     loop {
-        for x in input.into_iter() {
+        for x in input.iter() {
             total += x;
             if !freqs.insert(total) {
                 return total;
@@ -44,7 +44,7 @@ fn open_problem_file() -> String {
 fn parse_input(s: &String) -> Vec<i32> {
     let split = s.split("\n");
     let vec_of_strs: Vec<&str> = split.collect();
-    let parsed: Vec<i32> = vec_of_strs.into_iter().map(|x| {
+    let parsed: Vec<i32> = vec_of_strs.iter().map(|x| {
         x.parse().expect("could not parse")
     }).collect();
     return parsed;
