@@ -1,4 +1,5 @@
 const fs = require('fs')
+let input = fs.readFileSync(__dirname + '/day8.txt', 'utf8').split(' ').map(Number)
 
 class Node {
   constructor(c, m) {
@@ -48,11 +49,10 @@ function valueNode(root) {
     return t + valueNode(root.children[m-1])
   }, 0)
 }
-// let input = '2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2'.split(' ').map(Number)
-let input = fs.readFileSync('day8.txt', 'utf8').split(' ').map(Number)
+
 let root = createNodes(input)
 
-// console.log(sumMeta(root))
-console.log(valueNode(root))
+console.log('solution 1:', sumMeta(root))
+console.log('solution 2:', valueNode(root))
 
 

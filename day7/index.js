@@ -1,4 +1,5 @@
 const fs = require('fs')
+let input = fs.readFileSync(__dirname + '/day7.txt', 'utf8').trim().split('\n')
 
 class Step {
   constructor(val) {
@@ -64,7 +65,7 @@ function getOrder(steps) {
     done.add(bestNextStep)
     order.push(bestNextStep.val)
   }
-  return order
+  return order.join('')
 }
 
 function completeSteps(steps, baseTime, workers) {
@@ -103,18 +104,7 @@ function completeSteps(steps, baseTime, workers) {
   return seconds
 }
 
-// let input = `
-// Step C must be finished before step F can begin.
-// Step F must be finished before step E can begin.
-// Step C must be finished before step A can begin.
-// Step A must be finished before step D can begin.
-// Step B must be finished before step E can begin.
-// Step D must be finished before step E can begin.
-// Step A must be finished before step B can begin.
-// `.trim().split('\n')
-
-let input = fs.readFileSync('data/day7.txt', 'utf8').trim().split('\n')
-
 let steps = getSteps(input)
-console.log(completeSteps(steps, 60, 5))
+console.log('solution 1:', getOrder(steps))
+console.log('solution 2:', completeSteps(steps, 60, 5))
 
