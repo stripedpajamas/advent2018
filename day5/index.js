@@ -56,5 +56,5 @@ function improveReaction (input) {
   return min
 }
 
-console.log('solution 1:', react(input))
-console.log('solution 2:', improveReaction(input))
+console.log('\tsolution 1:', react(input))
+console.log('\tsolution 2:', improveReaction(input))

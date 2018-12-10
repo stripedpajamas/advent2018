@@ -14,5 +14,5 @@ function findRepeat (input) {
   }
 }
 
-console.log('solution 1:', input.reduce((t, e) => t + e))
-console.log('solution 2:', findRepeat(input))
+console.log('\tsolution 1:', input.reduce((t, e) => t + e))
+console.log('\tsolution 2:', findRepeat(input))

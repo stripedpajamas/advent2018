@@ -108,5 +108,5 @@ function completeSteps (steps, baseTime, workers) {
 }
 
 let steps = getSteps(input)
-console.log('solution 1:', getOrder(steps))
-console.log('solution 2:', completeSteps(steps, 60, 5))
+console.log('\tsolution 1:', getOrder(steps))
+console.log('\tsolution 2:', completeSteps(steps, 60, 5))

@@ -80,5 +80,5 @@ function findNonOverlapper (sections) {
 
 let parsed = parseInput(input)
 
-console.log('solution 1:', findOverlaps(parsed))
-console.log('solution 2:', findNonOverlapper(parsed))
+console.log('\tsolution 1:', findOverlaps(parsed))
+console.log('\tsolution 2:', findNonOverlapper(parsed))

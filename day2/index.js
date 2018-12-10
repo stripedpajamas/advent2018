@@ -60,5 +60,5 @@ function getSimilarIds (input) {
   }
 }
 
-console.log('solution 1:', getChecksum(input))
-console.log('solution 2:', getSimilarIds(input))
+console.log('\tsolution 1:', getChecksum(input))
+console.log('\tsolution 2:', getSimilarIds(input))

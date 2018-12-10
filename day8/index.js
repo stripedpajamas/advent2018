@@ -54,5 +54,5 @@ function valueNode (root) {
 
 let root = createNodes(input)
 
-console.log('solution 1:', sumMeta(root))
-console.log('solution 2:', valueNode(root))
+console.log('\tsolution 1:', sumMeta(root))
+console.log('\tsolution 2:', valueNode(root))
