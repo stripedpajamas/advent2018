@@ -1,5 +1,6 @@
 const fs = require('fs')
-let input = fs.readFileSync(__dirname + '/day4.txt', 'utf8')
+const path = require('path')
+let input = fs.readFileSync(path.join(__dirname, 'day4.txt'), 'utf8')
   .split('\n')
 
 /*
@@ -52,11 +53,13 @@ function getSleepMap (entries) {
     let id = entries[i].guardId
     if (entries[i].action === 1) {
       // fell asleep
-      let wokeUp = entries[i+1].time.getMinutes()
+      let wokeUp = entries[i + 1].time.getMinutes()
       for (let m = entries[i].time.getMinutes(); m < wokeUp; m++) {
-        if (!sleepMap[id]) sleepMap[id] = {
-          minutes: new Array(60).fill(0),
-          total: 0
+        if (!sleepMap[id]) {
+          sleepMap[id] = {
+            minutes: new Array(60).fill(0),
+            total: 0
+          }
         }
         sleepMap[id].minutes[m]++
         sleepMap[id].total++
@@ -98,7 +101,7 @@ function getGuardMinuteCombo2 (sleepMap) {
     obj[id] = { minute, slept: sleepMap[id].minutes[minute] }
     return obj
   }, {})
-  
+
   // now get the highest slept on minute
   let minute = 0
   let slept = 0

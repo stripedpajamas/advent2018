@@ -1,5 +1,6 @@
 const fs = require('fs')
-let input = fs.readFileSync(__dirname + '/day1.txt', 'utf8')
+const path = require('path')
+let input = fs.readFileSync(path.join(__dirname, 'day1.txt'), 'utf8')
   .split('\n').map(Number)
 
 function findRepeat (input) {
@@ -15,4 +16,3 @@ function findRepeat (input) {
 
 console.log('solution 1:', input.reduce((t, e) => t + e))
 console.log('solution 2:', findRepeat(input))
-

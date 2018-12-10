@@ -1,5 +1,6 @@
 const fs = require('fs')
-let input = fs.readFileSync(__dirname + '/day2.txt', 'utf8')
+const path = require('path')
+let input = fs.readFileSync(path.join(__dirname, 'day2.txt'), 'utf8')
   .split('\n')
 
 function getChecksum (input) {
@@ -32,7 +33,7 @@ function getSimilarIds (input) {
   // for each id, iterate through each letter
   // with the other ids. if a difference is found
   // set a flag and keep going. if another difference
-  // is found, skip that pair. 
+  // is found, skip that pair.
   for (let i = 0; i < input.length - 1; i++) {
     for (let j = i + 1; j < input.length; j++) {
       let differences = 0
@@ -49,7 +50,7 @@ function getSimilarIds (input) {
         }
       }
       if (tooManyDifferences) continue
-      if (differences == 1) {
+      if (differences === 1) {
         // our pair -- find common letters
         let result = input[i].split('').slice()
         result.splice(differingIdx, 1)
@@ -61,5 +62,3 @@ function getSimilarIds (input) {
 
 console.log('solution 1:', getChecksum(input))
 console.log('solution 2:', getSimilarIds(input))
-
-

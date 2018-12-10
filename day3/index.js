@@ -1,5 +1,7 @@
+/* eslint no-unused-vars: ["error", { "varsIgnorePattern": "^_$" }] */
 const fs = require('fs')
-let input = fs.readFileSync(__dirname + '/day3.txt', 'utf8')
+const path = require('path')
+let input = fs.readFileSync(path.join(__dirname, 'day3.txt'), 'utf8')
   .split('\n')
 
 function parseInput (input) {

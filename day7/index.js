@@ -1,14 +1,17 @@
+/* eslint no-unused-vars: ["error", { "varsIgnorePattern": "^_$" }] */
 const fs = require('fs')
-let input = fs.readFileSync(__dirname + '/day7.txt', 'utf8').trim().split('\n')
+const path = require('path')
+let input = fs.readFileSync(path.join(__dirname, 'day7.txt'), 'utf8')
+  .trim().split('\n')
 
 class Step {
-  constructor(val) {
+  constructor (val) {
     this.val = val
     this.dependencies = new Set()
   }
 }
 
-function getSteps(input) {
+function getSteps (input) {
   let steps = new Map()
   input.forEach((line) => {
     let split = line.split(' ')
@@ -31,7 +34,7 @@ function getSteps(input) {
   return steps
 }
 
-function getBestNextStep(steps) {
+function getBestNextStep (steps) {
   let bestNextStep = null
   for (let step of steps) {
     if (!bestNextStep || step.val < bestNextStep.val) {
@@ -41,7 +44,7 @@ function getBestNextStep(steps) {
   return bestNextStep
 }
 
-function getPossibleNextSteps(steps, done) {
+function getPossibleNextSteps (steps, done) {
   let possibleNextSteps = new Set()
   for (let [_, step] of steps) {
     if (done.has(step)) continue
@@ -53,7 +56,7 @@ function getPossibleNextSteps(steps, done) {
   return possibleNextSteps
 }
 
-function getOrder(steps) {
+function getOrder (steps) {
   let order = []
   let done = new Set()
   // see if all dependencies have been done
@@ -68,7 +71,7 @@ function getOrder(steps) {
   return order.join('')
 }
 
-function completeSteps(steps, baseTime, workers) {
+function completeSteps (steps, baseTime, workers) {
   let seconds = 0
   let doing = new Map()
   let done = new Set()
@@ -78,7 +81,7 @@ function completeSteps(steps, baseTime, workers) {
       // get possible next steps
       let possibleNextSteps = getPossibleNextSteps(steps, done)
       // filter out any steps we are doing
-      for (step of possibleNextSteps) {
+      for (let step of possibleNextSteps) {
         if (doing.has(step)) possibleNextSteps.delete(step)
       }
       // get best next step
@@ -91,7 +94,7 @@ function completeSteps(steps, baseTime, workers) {
     // work on what we're doing
     for (let [step, timeRemaining] of doing) {
       timeRemaining--
-      if (timeRemaining == 0) {
+      if (timeRemaining === 0) {
         availableWorkers++
         done.add(step)
         doing.delete(step)
@@ -107,4 +110,3 @@ function completeSteps(steps, baseTime, workers) {
 let steps = getSteps(input)
 console.log('solution 1:', getOrder(steps))
 console.log('solution 2:', completeSteps(steps, 60, 5))
-

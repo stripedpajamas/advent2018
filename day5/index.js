@@ -1,5 +1,7 @@
+/* eslint no-unused-vars: ["error", { "varsIgnorePattern": "^_$" }] */
 const fs = require('fs')
-let input = fs.readFileSync(__dirname + '/day5.txt', 'utf8')
+const path = require('path')
+let input = fs.readFileSync(path.join(__dirname, 'day5.txt'), 'utf8')
   .split('')
 
 function willReact (a, b) {
@@ -17,7 +19,7 @@ function react (s) {
   let len = s.length
   for (let i = 0; i < s.length - 1; i++) {
     let left = i
-    let right = i+1
+    let right = i + 1
     while (left >= 0 && right < s.length) {
       if (willReact(s[left], s[right])) {
         s[left] = '$'
