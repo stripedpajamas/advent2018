@@ -209,4 +209,4 @@ function copyMap (map) {
 
 let map = input
 console.log('\tsolution 1:', getFirstCollision(map))
-console.log('\tsolution 2:', getLastCarPosition(map))
+// console.log('\tsolution 2:', getLastCarPosition(map))
