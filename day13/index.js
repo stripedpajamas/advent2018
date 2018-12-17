@@ -114,6 +114,13 @@ function getFirstCollision (input) {
   let map = copyMap(input)
   let cars = getCars(map)
   while (true) {
+    cars.sort((a, b) => {
+      if (a.row < b.row) return -1
+      if (a.row > b.row) return 1
+      if (a.col < b.col) return -1
+      if (a.col > b.col) return 1
+      return 0
+    })
     for (let car of cars) {
       let { collision, row, col } = car.tick(map)
       if (collision) {
@@ -133,54 +140,37 @@ function getLastCarPosition (input) {
     carLocations.set([car.row, car.col].join(), car)
   }
   while (allCars.size > 1) {
-    for (let r = 0; r < map.length; r++) {
-      for (let c = 0; c < map[r].length; c++) {
-        let car = carLocations.get([r, c].join())
-        if (!car || !allCars.has(car)) continue
-        let { collision, row, col } = car.tick(map)
-        if (collision) {
-          // remove this car and the colliding car
-          // console.log('collision at %d,%d', row, col)
-          let otherCar = carLocations.get([row, col].join())
-          allCars.delete(car)
-          allCars.delete(otherCar)
-          // console.log('deleted:\n\t', car, '\n\t', otherCar)
-          // what was under the other car is the correct road
-          map[otherCar.row][otherCar.col] = otherCar.under
+    // make sure to iterate through cars in correct order
+    cars.sort((a, b) => {
+      if (a.row < b.row) return -1
+      if (a.row > b.row) return 1
+      if (a.col < b.col) return -1
+      if (a.col > b.col) return 1
+      return 0
+    })
+    for (let car of cars) {
+      if (!allCars.has(car)) continue
+      let beforeMovedLocation = [car.row, car.col]
+      let { collision, row, col } = car.tick(map)
+      if (collision) {
+        // remove this car and the colliding car
+        // console.log('collision at %d,%d', row, col)
+        let otherCar = carLocations.get([row, col].join())
+        allCars.delete(car)
+        allCars.delete(otherCar)
+        // console.log('deleted:\n\t', car, '\n\t', otherCar)
+        // what was under the other car is the correct road
+        map[otherCar.row][otherCar.col] = otherCar.under
 
-          carLocations.delete([row, col].join())
-          carLocations.delete([r, c].join())
-          // console.log('remaining cars:', allCars.size)
-        } else {
-          // update the map to where this car now is
-          carLocations.delete([r, c].join())
-          carLocations.set([row, col].join(), car)
-        }
+        carLocations.delete([row, col].join())
+        carLocations.delete(beforeMovedLocation.join())
+        // console.log('remaining cars:', allCars.size)
+      } else {
+        // update the map to where this car now is
+        carLocations.delete(beforeMovedLocation.join())
+        carLocations.set([row, col].join(), car)
       }
     }
-    // for (let car of cars) {
-    //   if (!allCars.has(car)) continue
-    //   let beforeMovedLocation = [car.row, car.col]
-    //   let { collision, row, col } = car.tick(map)
-    //   if (collision) {
-    //     // remove this car and the colliding car
-    //     // console.log('collision at %d,%d', row, col)
-    //     let otherCar = carLocations.get([row, col].join())
-    //     allCars.delete(car)
-    //     allCars.delete(otherCar)
-    //     // console.log('deleted:\n\t', car, '\n\t', otherCar)
-    //     // what was under the other car is the correct road
-    //     map[otherCar.row][otherCar.col] = otherCar.under
-
-    //     carLocations.delete([row, col].join())
-    //     carLocations.delete(beforeMovedLocation.join())
-    //     // console.log('remaining cars:', allCars.size)
-    //   } else {
-    //     // update the map to where this car now is
-    //     carLocations.delete(beforeMovedLocation.join())
-    //     carLocations.set([row, col].join(), car)
-    //   }
-    // }
   }
   for (let final of allCars) {
     return { row: final.row, col: final.col }
@@ -188,11 +178,11 @@ function getLastCarPosition (input) {
 }
 
 function getCars (map) {
-  const cars = new Set()
+  const cars = []
   map.forEach((row, rowIdx) => {
     row.forEach((val, colIdx) => {
       if (carTypes.includes(val)) {
-        cars.add(new Car(val, rowIdx, colIdx))
+        cars.push(new Car(val, rowIdx, colIdx))
       }
     })
   })
@@ -209,4 +199,4 @@ function copyMap (map) {
 
 let map = input
 console.log('\tsolution 1:', getFirstCollision(map))
-// console.log('\tsolution 2:', getLastCarPosition(map))
+console.log('\tsolution 2:', getLastCarPosition(map))
