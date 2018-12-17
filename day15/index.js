@@ -5,8 +5,8 @@ let input = fs.readFileSync(path.join(__dirname, 'day15.txt'), 'utf8')
 
 
 class Unit {
-  constructor ({ type, row, col }) {
-    this.power = 3
+  constructor ({ type, row, col, power }) {
+    this.power = power
     this.hp = 200
     this.row = row
     this.col = col
@@ -82,87 +82,56 @@ class Unit {
     inRange = inRange.filter((target) => target.type !== this.type)
     if (!inRange.length) return
     let weakestTarget = this.getWeakestTarget(inRange)
-    if (weakestTarget.hp <= 3) {
+    if (weakestTarget.hp <= this.power) {
       // kill this mf
       weakestTarget.dead = true
       map[weakestTarget.row][weakestTarget.col] = '.'
     } else {
-      weakestTarget.hp -= 3
+      weakestTarget.hp -= this.power
     }
   }
-  getShortestPath (destination, map) {
-    // find shortest path to destination from current position
-    // if there is a tie, use reading order to break tie
-    // dijkstra's ?
-    let startKey = [this.row, this.col].join()
-    let unvisited = new Map()
-    let visited = new Set()
-    let dist = new Map()
-    let previous = new Map() // previous node in optimal path
-    unvisited.set(startKey, [this.row, this.col])
-    previous.set(startKey, null)
-    dist.set(startKey, 0)
-    while (unvisited.size) {
-      // get unvisited node with smallest distance
-      let current // [row, col]
-      let currentKey
-      let smallest = Infinity
-      // console.log('unvisited size:', unvisited.size)
-      for (let [key, node] of unvisited) {
-        if (dist.get(key) < smallest) {
-          current = node
-          currentKey = key
-          smallest = dist.get(key)
-        }
-      }
-      // see if we've reached our destination
-      if (current[0] === destination[0] && current[1] === destination[1]) {
-        // reverse iterate through previous map
-        let path = []
-        let n = currentKey
-        while (previous.get(n)) {
-          path.unshift(n.split(',').map(Number))
-          n = previous.get(n)
-        }
-        return path
-      }
-      // mark this node as visited
-      visited.add(currentKey)
-      unvisited.delete(currentKey)
-      // touch each of this node's neighbors
-      this.getAdjacent([current], map).forEach((neighbor) => {
-        // if we've already visited this neighbor, skip it
-        let neighborKey = neighbor.join()
-        if (visited.has(neighborKey)) return
-        let possibleBestDistance = dist.get(currentKey) + 1
-        if (possibleBestDistance < (dist.get(neighborKey) || Infinity)) {
-          dist.set(neighborKey, possibleBestDistance)
-          previous.set(neighborKey, currentKey)
-        }
-        unvisited.set(neighborKey, neighbor)
-      })
+  getSets (map) {
+    let alreadyQueued = []
+    let alreadyDiscovered = []
+    let previous = []
+    for (let r = 0; r < map.length; r++) {
+      alreadyQueued[r] = []
+      alreadyDiscovered[r] = []
+      previous[r] = []
     }
+    return { previous, alreadyQueued, alreadyDiscovered }
   }
   getClosestDestination (destinations, map) {
-    // for each destination, get shortest path
-    let paths = destinations.map((destination) => this.getShortestPath(destination, map))
-    paths = paths.filter(p => !!p)
-    paths.sort(([ar, ac], [br, bc]) => {
-      if (ar < br) return -1
-      if (ar > br) return 1
-      if (ac < bc) return -1
-      if (ac > bc) return 1
-      return 0
-    })
-    let min = Infinity
-    let closestDestination
-    for (let path of paths) {
-      if (path.length < min) {
-        min = path.length
-        closestDestination = path
+    // bfs
+    let { alreadyQueued, alreadyDiscovered, previous } = this.getSets(map)
+    let queue = [[this.row, this.col]]
+    alreadyQueued[this.row][this.col] = true
+    previous[this.row][this.col] = null
+    while (queue.length) {
+      let current = queue.shift()
+      for (let destination of destinations) {
+        if (current[0] === destination[0] && current[1] === destination[1]) {
+          // we have arrived at something we wanted to get to
+          let path = [current]
+          let node = current
+          while (previous[node[0]][node[1]] !== null) {
+            path.unshift(previous[node[0]][node[1]])
+            node = previous[node[0]][node[1]]
+          }
+          path.shift() // take this node out of path
+          return path
+        }
       }
+      for (let neighbor of this.getAdjacent([current], map)) {
+        if (alreadyDiscovered[neighbor[0]][neighbor[1]]) continue
+        if (alreadyQueued[neighbor[0]][neighbor[1]]) continue
+
+        queue.push(neighbor)
+        alreadyQueued[neighbor[0]][neighbor[1]] = true
+        previous[neighbor[0]][neighbor[1]] = current
+      }
+      alreadyDiscovered[current[0]][current[1]] = true
     }
-    return closestDestination
   }
   move (destinations, map) {
     let closestDestination = this.getClosestDestination(destinations, map)
@@ -196,26 +165,34 @@ class Unit {
 }
 
 class Game {
-  constructor (map) {
+  constructor (map, elfPower) {
     this.map = this.copyMap(map)
     
     // replace G/E with Units on copy of map
     this.units = []
+    if (elfPower) {
+      this.safeElves = true
+      this.elfPower = elfPower
+    }
     this.parseUnits()
     
     this.rounds = 0
   }
   sumHitPoints () {
-    return this.map.reduce((sum, row) => sum + row.reduce((rowSum, unit) => {
-      if (typeof unit === 'object') return rowSum + unit.hp
-      return rowSum
-    }, 0), 0)
+    return this.units.reduce((total, unit) => total + (unit.dead ? 0 :unit.hp), 0)
   }
   parseUnits () {
     for (let r = 0; r < this.map.length; r++) {
       for (let c = 0; c < this.map.length; c++) {
         if (this.map[r][c] !== '.' && this.map[r][c] !== '#') {
-          this.map[r][c] = new Unit({ type: this.map[r][c], row: r, col: c })
+          this.map[r][c] = new Unit({
+            type: this.map[r][c],
+            row: r,
+            col: c,
+            power: this.safeElves && this.map[r][c] === 'E'
+              ? this.elfPower
+              : 3
+          })
           this.units.push(this.map[r][c])
         }
       }
@@ -227,36 +204,69 @@ class Game {
     return copy
   }
   print () {
-    game.map.forEach((row) => {
+    this.map.forEach((row) => {
       console.log(row.map((val) => (val.type && val.type) || val).join(''))
     })
     console.log('')
   }
   play () {
     let combatOver = false
+    console.log('elf count:', this.units.filter(x => x.type === 'E').length)
     while (!combatOver) {
+      this.print()
       this.rounds++
-      let units = this.units.sort((a, b) => {
+      this.units.sort((a, b) => {
         if (a.row < b.row) return -1
         if (a.row > b.row) return 1
         if (a.col < b.col) return -1
         if (a.col > b.col) return 1
         return 0
       })
-      for (let unit of units) {
-        if (unit.dead) continue
-        let keepGoing = unit.takeTurn(this.map, units)
+      for (let unit of this.units) {
+        if (unit.dead) {
+          if (this.safeElves && unit.type === 'E') {
+            return -1
+          }
+          continue
+        }
+        let keepGoing = unit.takeTurn(this.map, this.units)
         if (!keepGoing) {
           combatOver = true
           break
         }
       }
-      this.units = this.units.filter(u => !u.dead)
+      let newUnits = []
+      for (let unit of this.units) {
+        if (!unit.dead) {
+          newUnits.push(unit)
+        } else {
+          if (this.safeElves && unit.type === 'E') {
+            return -1
+          }
+        }
+      }
+      this.units = newUnits
     }
+    this.print()
+    console.log('final elf count:', this.units.filter(x => x.type === 'E').length)
+    console.log('# of rounds:', this.rounds)
     return (this.rounds - 1) * this.sumHitPoints()
   }
 }
 
-let game = new Game(input)
-console.log('\tsolution 1:', game.play())
+function findSafeElfPower (input) {
+  let power = 4
+  let game = new Game(input, power)
+  let result = game.play()
+  while (result < 0) {
+    power++
+    console.log('trying power %d', power)
+    game = new Game(input, power)
+    result = game.play()
+  }
+  return result
+}
+
+console.log('\tsolution 1:', new Game(input).play())
+console.log('\tsolution 2:', findSafeElfPower(input))
 
